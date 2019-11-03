@@ -1,6 +1,6 @@
 from django.urls import include, path
 from rest_framework.urlpatterns import format_suffix_patterns
-from .views import SavingTypeList, SavingTypeDetail, SavingAccountList,SavingAccountDetail,SavingList,SavingDetail
+from .views import *
 
 
 urlpatterns = [

@@ -6,6 +6,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from decimal import *
 from datetime import timedelta
+from saving_account.models import *
 
 #create loan type
 class LoanType(models.Model):
@@ -45,7 +46,7 @@ class LoanAccount(models.Model):
     loan_type = models.OneToOneField(LoanType, on_delete=models.CASCADE)
     status = models.CharField("Status Type",choices=STATUS_TYPE,max_length=50,default="OPEN")
 
-    amount_received = models.DecimalField(max_digits=19,decimal_places=10)
+    amount_received = models.DecimalField(max_digits=15,decimal_places=2)
     createdBy = models.ForeignKey(User, null=True, on_delete=models.SET_NULL,editable=False)
     createdAt = models.DateTimeField(auto_now_add=True,editable=False)
     updatedAt = models.DateTimeField(auto_now=True)
@@ -68,10 +69,10 @@ def loan_payment_ids():
 class LoanPayment(models.Model):
     id = models.IntegerField(default=loan_payment_ids, editable=False,primary_key=True)
     loan_account = models.ForeignKey(LoanAccount,on_delete=models.CASCADE)
-    paid = models.DecimalField(max_digits=19,decimal_places=10)
+    paid = models.DecimalField(max_digits=15,decimal_places=2)
 
     createdBy = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, editable=False)
-    createdAt = models.DateTimeField(auto_now_add=True, editable=False)
+    createdAt = models.DateTimeField(auto_now_add=True, editable=True)
     updatedAt = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -89,10 +90,14 @@ class LoanPaymentHistory(models.Model):
     id = models.IntegerField(default=loan_payment_history_ids, editable=False,primary_key=True)
     loan_payment = models.ForeignKey(LoanPayment,on_delete=models.CASCADE)
     date = models.DateField()
-    principle = models.DecimalField(max_digits=19,decimal_places=10)
-    interest =models.DecimalField(max_digits=19,decimal_places=10)
-    paid = models.DecimalField(max_digits=19,decimal_places=10)
-    remaining = models.DecimalField(max_digits=19,decimal_places=10)
+    principle = models.DecimalField(max_digits=15,decimal_places=2)
+    interest =models.DecimalField(max_digits=15,decimal_places=2)
+    paid = models.DecimalField(max_digits=15,decimal_places=2)
+    remaining = models.DecimalField(max_digits=15,decimal_places=2)
+
+    createdBy = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, editable=False)
+    createdAt = models.DateTimeField(auto_now_add=True, editable=False)
+    updatedAt = models.DateTimeField(auto_now=True)
 
     # def montly_interest(self):
     #     amount = self.loan_payment.loan_account.amount_received
@@ -126,17 +131,18 @@ class LoanPaymentHistory(models.Model):
         self.principle = self.get_principle()
         self.paid = self.loan_payment.paid
         principle_with_interest = self.principle + self.interest
-        if self.remaining == None:
+        self.remaining = round(principle_with_interest,2) - self.paid
+        if self.remaining <= 0.00:
             loan_account = self.loan_payment.loan_account
             loan_account.status = "CLOSED"
             loan_account.save()
-        self.remaining = principle_with_interest - self.paid
         super(LoanPaymentHistory, self).save(*args, **kwargs)
 
     @receiver(post_save, sender=LoanPayment)
     def create_loan_payment_history(sender, instance, created, **kwargs):
         if created:
-            LoanPaymentHistory.objects.create(loan_payment=instance)
+           LoanPaymentHistory.objects.create(loan_payment=instance)
+
 
     class Meta:
-        db_table = 'loan_detail'
+        db_table = 'loan_payment_history'

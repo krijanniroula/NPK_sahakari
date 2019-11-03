@@ -28,8 +28,8 @@ class SavingTypeDetail(APIView):
             raise Http404
 
     def get(self, request, slug, format=None):
-        saving_type = self.get_object(slug)
-        serializer = SavingTypeSerializer(saving_type)
+        loan_type = self.get_object(slug)
+        serializer = SavingTypeSerializer(loan_type)
         return Response(serializer.data)
 
     def put(self, request, slug, format=None):

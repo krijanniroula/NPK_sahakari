@@ -37,12 +37,12 @@ class LoanAccountSerializer(serializers.ModelSerializer):
 
 
 class LoanPaymentSerializer(serializers.ModelSerializer):
-    saving_account = LoanAccountSerializer(read_only=True)
-    saving_account_id = serializers.PrimaryKeyRelatedField(source='saving_account', queryset=LoanAccount.objects.all())
+    loan_account = LoanAccountSerializer(read_only=True)
+    loan_account_id = serializers.PrimaryKeyRelatedField(source='loan_account', queryset=LoanAccount.objects.all())
     createdBy = serializers.ReadOnlyField(source='createdBy.username')
     class Meta:
         model = LoanPayment
-        fields = ['saving_account','saving_account_id','particular','amount','amount_type','createdBy', 'createdAt', 'updatedAt']
+        fields = ['id','loan_account','loan_account_id','paid','createdBy', 'createdAt', 'updatedAt']
 
     def create(self, validated_data):
         saving= LoanPayment.objects.create(**validated_data)
@@ -50,4 +50,25 @@ class LoanPaymentSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         return super(LoanPaymentSerializer, self).update(instance,validated_data)
+
+class LoanPaymentHistorySerializer(serializers.ModelSerializer):
+    loan_payment = LoanPaymentSerializer(read_only=True)
+    loan_payment_id = serializers.PrimaryKeyRelatedField(source='loan_payment', queryset=LoanPayment.objects.all())
+    createdBy = serializers.ReadOnlyField(source='createdBy.username')
+
+
+    class Meta:
+        model = LoanPaymentHistory
+        fields = ['id','loan_payment','loan_payment_id','date','principle','interest','paid','remaining','createdBy', 'createdAt', 'updatedAt']
+
+    def create(self, validated_data):
+        saving= LoanPaymentHistory.objects.create(**validated_data)
+        return saving
+
+    def update(self, instance, validated_data):
+        return super(LoanPaymentHistorySerializer, self).update(instance,validated_data)
+
+
+
+
 
