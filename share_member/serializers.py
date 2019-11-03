@@ -13,7 +13,7 @@ class ShareMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShareMember
         fields = ['share_no','first_name', 'middle_name', 'last_name', 'email', 'phone', 'age', 'gender', 'father_name','address',
-                  'mother_name', 'grand_father_name', 'alternative_person', 'isActive','createdBy','createdAt', 'updatedAt']
+                  'mother_name', 'grand_father_name', 'alternative_person','amount_paid','extra_amount' ,'isActive','createdBy','createdAt', 'updatedAt']
 
     def create(self, validated_data):
         address_data = validated_data.pop('address')

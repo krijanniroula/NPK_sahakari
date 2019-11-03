@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'share_member.apps.ShareMemberConfig',
+    'saving_account.apps.SavingAccountConfig',
+    'loan.apps.LoanConfig',
     'rest_framework'
 ]
 
